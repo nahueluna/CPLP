@@ -547,6 +547,10 @@ El alcance de los identificadores debe indicarse desde la línea siguiente a su 
 **d) Su tipo.**
 **Justifique la respuesta**
 
+**b) es verdadera:** 
+El nombre de una variable puede indirectamente condicionar su alcance, ya que este comprende desde que se declara la variable hasta que finaliza el bloque donde se declaró. Sin embargo, si antes de eso hubiera una variable con el mismo nombre en un bloque interno (subprocedimiento o similar), entonces se dice que la variable original está sombreada por la interna, y su alcance se ve "interrumpido" el tiempo que dura esta.
+
+Las demás son falsas.
 
 ### Ejercicio 14: Sean los siguientes archivos en C, los cuales se compilan juntos
 **Indicar para cada variable de que tipo es en cuanto al momento de ligadura de su l-valor.**
@@ -627,11 +631,6 @@ ARCHIVO2.C
 **T.V.** = Tiempo de Vida
 r-valor debe ser tomado al momento de la alocación en memoria
 El alcance de los identificadores debe indicarse desde la línea siguiente a su declaración.
-
-**b) es verdadera:** 
-El nombre de una variable puede indirectamente condicionar su alcance, ya que este comprende desde que se declara la variable hasta que finaliza el bloque donde se declaró. Sin embargo, si antes de eso hubiera una variable con el mismo nombre en un bloque interno (subprocedimiento o similar), entonces se dice que la variable original está sombreada por la interna, y su alcance se ve "interrumpido" el tiempo que dura esta.
-
-Las demás son falsas.
 
 ### Ejercicio 15: Para javascript investigue la diferencia semántica para declarar una variable utilizando los modificadores const, var, let y la ausencia de cualquiera de estos. Compárelo con un lenguaje de su preferencia.
 
