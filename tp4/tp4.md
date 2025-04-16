@@ -243,15 +243,17 @@ K: constant float:= H*I
 
 **a.**
 
-Las constantes numéricas son aquellas que representan valores numéricos, ya sean enteros, reales u otros tipos numéricos definidos por el usuario. Se utilizan para asignar valor fijos a variables numéricas y para realizar cálculos matemáticos. La ligadura se produce en compilación, es decir, se conocen antes de que se ejecuten y los valores se incorporan al código objeto.
-Las constantes comunes, conocidas como constantes definidas, son aquellas que no necesariamente representan valores numéricos. Se utilizan para asignar valores fijos a tipos no numéricos como strings, tipos enumerados y otros tipos definidos por el usuario. Se ligan en compilación.
+Las constantes numéricas son aquellas que representan valores numéricos, ya sean enteros, reales u otros tipos numéricos definidos por el usuario. Se utilizan para asignar valor fijos a variables numéricas y para realizar cálculos matemáticos. La ligadura se produce en compilación, es decir, se conocen antes de que se ejecuten y los valores se incorporan al código objeto. Son aquellas que se declaran indicando un tipo explícito. Ej: `H: constant Float := 3.5;` indica al compilador que será una constante de tipo float, la restringe.
+Las constantes comunes, conocidas como constantes definidas, son aquellas que no necesariamente representan valores numéricos. Se pueden utilizar para asignar valores fijos a tipos no numéricos como strings, tipos enumerados y otros tipos definidos por el usuario. Se ligan en compilación. Su valor se asigna sin indicar su tipo. Ej: `I: constant := 2;`, el compilador infiere su tipo según donde se use. 
 Siempre que se conozca el valor, la ligadura se produce en compilación. Existen casos especiales donde el valor podría depender de la ejecución de módulos y que la ligadura no sea estrictamente en compilación.
+
+`nota:` en la cátedra dicen que las constantes comunes se ligan en ejecución y las constantes numéricas se ligan en compilación.
 
 Esta clasificación permite organizar y entender mejor el código en Ada, ya que refleja la naturaleza de los valores que representan y cómo se utilizan en el programa.
 
 **b.**
 
-Las tres constantes son numéricas y su valor es conocido en compilación, por lo que el momento de la ligadura es en compilación.
+El valor de las tres constantes es conocido en compilación, por lo que el momento de la ligadura es en compilación.
 
 ### Ejercicio 6: Sea el siguiente archivo con funciones de C:
 
