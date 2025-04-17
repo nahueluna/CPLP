@@ -13,11 +13,12 @@ Definiciones:
 
 Es el período durante el cual la variable existe en memoria. Inicia en el momento en que se reserva memoria (alocación) y termina cuando se libera.
 Las variables pueden tener tiempo de vida automático (por bloque), estático (todo el programa) o dinámico (controlado por el programador).
+Se considera que empieza al comienzo del bloque (línea 1 o cuando comienza el módulo o programa), y termina al final del bloque. También puede interpretarse que comienza en la línea de la declaración. En todo caso aclarar.
 
 > Alcance
 
 Es el fragmento de código en el que se puede hacer referencia a una variable por su nombre. Existe el alcance estático (importa donde está escrita la variable) y alcance dinámico (importa quien llama a quien en tiempo de ejecución).
-En lenguajes como Pascal, donde la declaración pertenece a una sección `var`, el alcance comienza desde el inicio del bloque.
+Se considera que el alcance comienza una línea despues de la declaración y termina al final del bloque.
 
 > Tipo de almacenamiento
 
@@ -25,10 +26,9 @@ En lenguajes como Pascal, donde la declaración pertenece a una sección `var`, 
 
 > Tiempo de vida vs. Alcance
 
-- Alcance: cuándo puedo referirme por nombre a la variable en el código fuente. Visible desde la declaración hasta el final del bloque.
+- Alcance: cuándo puedo referirme por nombre a la variable en el código fuente. Visible desde una línea después de la declaración hasta el final del bloque. El alcance de una variable puede ser enmascarado por otra de mismo nombre en un subprograma (bloque más interno). Durante esas líneas no se considera su alcance.
 - Tiempo de vida: cuándo la variable realmente existe en memoria. Activo en memoria desde que comienza la ejecución del bloque donde está hasta que termina esa ejecución.
 - Tener en cuenta que un bucle for, estructura if y demás estructuras de control son considerados bloques, por lo que una variable declarada allí tendrá un tiempo de vida y alcance limitado a este.
-
 
 ![alt text](images/notas2.png)
 
@@ -36,22 +36,28 @@ En lenguajes como Pascal, donde la declaración pertenece a una sección `var`, 
 
 Tiempo de vida de un static es todo el programa (independientemente de si fue declarada dentro de un módulo o no). Su alcance es desde que es declarada hasta el final del bloque.
 El extern se usa para extender el alcance de una variable a otro archivo. Para hacer uso de esta cláusula, la variable debe estar previamente definida y no puede ser interna (a una función por ejemplo), debe ser global.
-Tener en cuenta que si aparece una variable con el mismo nombre en un bloque (ej: en una función), el alcance de la variable que está en el bloque más general es opacado lo que dura dicho bloque interno.
 
 > Variables extern
 
-En C, el modificador `extern` se utiliza para declarar una variable global que está definida en otro archivo fuente y otro lugar del mismo archivo. Es una variable global estática (almacenamiento estático, pero no es `static`, que limita visibilidad).
-Su alcance se limita al archivo y bloque donde se declara. Si se declara fuera de una función, su alcance es todo el archivo desde esa declaración (una línea adelante). Si se lo hace dentro de una función, su alcance es ese bloque.
-`extern` no crea una nueva variable, solo permite que se acceda a ella desde otro lado. Pero la alocación se da una única vez para la variable original. `extern` tampoco inicializa, pues toma el valor que la variable ya tenía.
+En C, el modificador `extern` se utiliza para declarar una variable global que está definida en otro archivo fuente u otro lugar del mismo archivo. Es una variable global estática (almacenamiento estático, pero no es `static`, que limita visibilidad).
+Su tiempo de vida, al ser global, comprenderá todo el programa menos las líneas donde se enmascare. Su alcance comprende el bloque donde es definido (alguno de los archivos) + el bloque donde es `extern`. Ambos tramos de alcance deben ser considerados.
+`extern` no crea una nueva variable, solo permite que se acceda a ella desde otro lado. Pero la alocación se da una única vez para la variable original. `extern` tampoco inicializa, pues toma el valor que la variable ya tenía. Entonces, la variable se analiza una única vez, no de forma separada.
 - Debe llevar el mismo nombre que la variable original.
-- Principalmente para extender a otros archivos (ya es global, es redudante usar `extend` en el mismo archivo).
+- Principalmente para extender a otros archivos (ya es global, es redudante usar `extern` en el mismo archivo).
 - El tiempo de vida siempre refiere a la variable original, porque extend no crea una nueva variable (no aloca), solo utiliza la ya alocada. 
 - Dado que no es una definición y no tiene tiempo de vida propio, lo único que puede cambiar con respecto a la original es su alcance
 - Si la variable global es `static`, no puede declararse como `extern`.
-- Su tiempo de vida es toda la ejecución del programa. Esto engloba todos los archivos donde sea utilizada (el de origen y los `extern`).
+- Su tiempo de vida es toda la ejecución del programa. Esto engloba todos los archivos que conforman el programa (el de origen y los `extern`).
 
 Aunque no use `extern`, si el programa consta de dos archivos y una variable tiene tiempo de vida de todo el programa, abarca ambos archivos.
-Valor que apunta puntero (p^) tiene tipo de l-valor determinado por lo que apuntan. Si apuntan a variable estática o automática, serán de este tipo. Serán dinámicos si apunta a dirección de memoria reservada en la Heap (`new(...)` en Pascal) --> **corroborar esto** 
+Valor que apunta puntero (p^) tiene tipo de l-valor dinámico siempre.
+
+> Notas generales
+
+- Se indica el r-valor al momento de la alocación. Indefinido o basura indica que no se inicializa por defecto. C inicializa por defecto variables globales y estáticas. Punteros se inicializan con null (o nil).
+- El tiempo de vida, alcance y tipo de l-valor de un puntero `p` se analiza igual que una variable convencional. El alcance de `p^` será igual al de `p`, pero su tiempo de vida irá desde el `new()` o asignación de algo a lo que apunta (inclusive esa línea) hasta el dispose (inclusive). Se marca de forma continua, no de a tramos según se le asigne otra cosa.
+- El alcance de una función se analiza igual que el de una variable. El tiempo de vida de la función es únicamente su bloque, cuando se ejecuta.
+- En Ada se pueden declarar arreglos con tamaño n. Si ese n no se conoce en compilación el tipo de l-valor es semidinámico. Si n es una constante, ya conocida en compilación, entonces es automático.
 ___
 
 
@@ -81,9 +87,9 @@ ___
 
 - Nombre: a
 - Tipo: Integer
-- Alcance: 5-16
+- Alcance: 4-16
 - Tiempo de vida: 1-16 (desde que comienza el procedimiento se aloca)
-- R-value: 45 (al finalizar el procedimiento) o indenifido (porque cambia)
+- R-value: indefinido
 - L-value: automática
 
 **b) Compare los atributos de la variable del punto a) con los atributos de la variable de la línea 4. Que dato contiene esta variable?**
@@ -93,8 +99,8 @@ ___
 - Nombre: p
 - Tipo: puntero
 - Alcance: p 5-16, p^ 5-16
-- Tiempo de vida: p 1-16, p^ 7-8 8-13 13-15
-- R-value: p nil (al principio y final), p^ indefinido (toma valor de lo que apunta)
+- Tiempo de vida: p 1-16, p^ 7-15
+- R-value: p nil, p^ indefinido
 - L-value: p automática, p^ dinámica
 
 ### Ejercicio 2:
@@ -243,13 +249,8 @@ K: constant float:= H*I
 
 **a.**
 
-Las constantes numéricas son aquellas que representan valores numéricos, ya sean enteros, reales u otros tipos numéricos definidos por el usuario. Se utilizan para asignar valor fijos a variables numéricas y para realizar cálculos matemáticos. La ligadura se produce en compilación, es decir, se conocen antes de que se ejecuten y los valores se incorporan al código objeto. Son aquellas que se declaran indicando un tipo explícito. Ej: `H: constant Float := 3.5;` indica al compilador que será una constante de tipo float, la restringe.
-Las constantes comunes, conocidas como constantes definidas, son aquellas que no necesariamente representan valores numéricos. Se pueden utilizar para asignar valores fijos a tipos no numéricos como strings, tipos enumerados y otros tipos definidos por el usuario. Se ligan en compilación. Su valor se asigna sin indicar su tipo. Ej: `I: constant := 2;`, el compilador infiere su tipo según donde se use. 
-Siempre que se conozca el valor, la ligadura se produce en compilación. Existen casos especiales donde el valor podría depender de la ejecución de módulos y que la ligadura no sea estrictamente en compilación.
-
-`nota:` en la cátedra dicen que las constantes comunes se ligan en ejecución y las constantes numéricas se ligan en compilación.
-
-Esta clasificación permite organizar y entender mejor el código en Ada, ya que refleja la naturaleza de los valores que representan y cómo se utilizan en el programa.
+Las constantes numéricas son aquellas que representan valores numéricos, ya sean enteros, reales u otros tipos numéricos definidos por el usuario. **La ligadura se produce en compilación**, es decir, se conocen antes de que se ejecuten y los valores se incorporan al código objeto. Son aquellas que se declaran sin indicar tipo. Ej: `I: constant := 2;`. Su tipo se infiere según su uso.
+Las constantes comunes, conocidas como constantes definidas, son aquellas que no necesariamente representan valores numéricos. **Se ligan en ejecución**. Su valor se asigna indicando un tipo. Ej: `H: constant Float := 3.5;`. Se restringe a un tipo. 
 
 **b.**
 
@@ -364,16 +365,16 @@ Por lo tanto:
 - i: 1-15 -> Se considera desde el comienzo del programa hasta el final
 - h: 1-15
 - mipuntero: 1-15
-- mipuntero^: 9-10 y 10-12 -> Se considera en tramos, pues se le cambia la dirección a la que apunta (y por lo tanto la alocación de lo que apunta)
+- mipuntero^: 9-12
 
 **b.**
 
 > Alcance
 
-- i: 6-15
+- i: 5-15
 - h: 6-15
-- mipuntero: 6-15
-- mipuntero^: 6-15
+- mipuntero: 4-15
+- mipuntero^: 4-15
 
 **c.**
 
@@ -408,7 +409,7 @@ Tiempo de vida mayor que el alcance
 5.  }
 ```
 
-El tiempo de vida de `x` va desde el comienzo del método hasta su fin (1-5). Su alcance desde su declaración hasta el fin del bloque (3-5).
+El tiempo de vida de `x` va desde el comienzo del método hasta su fin (1-5). Su alcance desde una línea posterior a su declaración hasta el fin del bloque (4-5).
 
 **b.**
 Tiempo de vida menor que el alcance
@@ -438,7 +439,7 @@ Tiempo de vida igual que el alcance
 6.  }
 ```
 
-En este caso la variable `x` es global, por lo que tanto su tiempo de vida como su alcance comprenden desde la línea 1 a la 6 (todo el programa).
+En este caso la variable `x` es global, por lo que tanto su tiempo de vida como su alcance comprenden desde la línea 1 a la 6 (todo el programa). Esto si se considera que el alcance se toma desde la línea de declaración. Sino no es posible que coincidan.
 
 ### Ejercicio 10: 
 **Si tengo la siguiente declaración al comienzo de un procedimiento:**
@@ -523,14 +524,14 @@ Existen 3 clases de tipos: predefinidos por el lenguaje, definidos por el usuari
     <tr><td>n (línea 4)</td><td>automática</td><td>basura</td><td>5-29</td><td>2-29</td></tr>
     <tr><td>p (línea 4)</td><td>automática</td><td>basura</td><td>5-11 / 23-29</td><td>2-29</td></tr>
     <tr><td>v1 (línea 5)</td><td>automática</td><td>basura</td><td>6-29</td><td>2-29</td></tr>
-    <tr><td>c1 (línea 6)</td><td>automática</td><td>10</td><td>7-10 / 23-29</td><td>2-29</td></tr>
+    <tr><td>c1 (línea 6)</td><td>automática</td><td>basura -> es constante común</td><td>7-10 / 23-29</td><td>2-29</td></tr>
     <tr><td>v2 (línea 9)</td><td>semidinámica</td><td>basura</td><td>10-22</td><td>7-22</td></tr>
     <tr><td>c1 (línea 10)</td><td>automática</td><td>basura</td><td>11-22</td><td>7-22</td></tr>
     <tr><td>c2 (línea 10)</td><td>automática</td><td>basura</td><td>11-22</td><td>7-22</td></tr>
     <tr><td>p (línea 11)</td><td>automática</td><td>nil</td><td>12-22</td><td>7-22</td></tr>
     <tr><td>p^</td><td>dinamica</td><td>basura</td><td>12-22</td><td>15-18</td></tr>
     <tr><td>q (línea 11)</td><td>automática</td><td>nil</td><td>12-22</td><td>7-22</td></tr>
-    <tr><td>q^</td><td>dinámica</td><td>basura</td><td>12-22</td><td>16-18 (por "free p")</td></tr>
+    <tr><td>q^</td><td>dinámica</td><td>basura</td><td>12-22</td><td>16-18 (por "free p") ?</td></tr>
   </tbody>
 </table>
 
@@ -606,7 +607,7 @@ ARCHIVO2.C
   <tbody>
     <tr><td>v1 (línea 1)</td><td>estática</td><td>0</td><td>2-4 / 9-12 / 21-23</td><td>1-28</td></tr>
     <tr><td>a (línea 2)</td><td>estática</td><td>null</td><td>3-16</td><td>1-28</td></tr>
-    <tr><td>&a</td><td>dinámica o automático (porque apunta a v1 (línea 12))</td><td>basura</td><td>3-16</td><td>15-16</td></tr>
+    <tr><td>&a</td><td>dinámica</td><td>basura</td><td>3-16</td><td>15-16</td></tr>
     <tr><td>v1 (línea 4)</td><td>automática</td><td>basura</td><td>5-8</td><td>3-8</td></tr>
     <tr><td>y (línea 4)</td><td>automática</td><td>basura</td><td>5-8</td><td>3-8</td></tr>
     <tr><td>var3 (línea 10)</td><td>estática</td><td>0</td><td>11-16</td><td>1-28</td></tr>
@@ -617,7 +618,7 @@ ARCHIVO2.C
     <tr><td>aux (línea 25)</td><td>automática</td><td>basura</td><td>26-28</td><td>24-28</td></tr>
     <tr><td>fun2 (línea 3)</td><td>---</td><td>---</td><td>4-16</td><td>3-8</td></tr>
     <tr><td>main (línea 9)</td><td>---</td><td>---</td><td>10-16</td><td>9-16</td></tr>
-    <tr><td>fun2 (línea 19)</td><td>---</td><td>---</td><td>20-28</td><td>17-28</td></tr>
+    <tr><td>fun2 (línea 19)</td><td>---</td><td>---</td><td>20-28</td><td>19-23</td></tr>
     <tr><td>fun3 (línea 24)</td><td>---</td><td>---</td><td>25-28</td><td>24-28</td></tr>
   </tbody>
 </table>
@@ -626,7 +627,8 @@ ARCHIVO2.C
 - C inicializa en 0 únicamente variables que se guardan en el segmento de datos (globales y `static`). Variables automáticas contienen basura, no son inicializadas por defecto.
 - Prestar atención a alcance de funciones, una línea posterior a su declaración hasta que termina el bloque donde se define (el bloque en el que está, no su propia `}`).
 - `static` en funciones refiere a que limita su visibilidad, no que su tiempo de vida abarca todo el programa, como en las variables
-- En C estándar no pueden declararse funciones dentro de otras, pero en lenguajes que si, esto limita el alcance de funct2 dentro del bloque de funct1 (suponiendo que funct2 se declaró dentro de funct1), pero no limita su tiempo de vida. Su tiempo de vida sigue siendo todo el programa, porque una función se comporta distinto de una variable. No significa que tenga almacenamiento automático (de hecho esto no aplica a funciones), simplemente implica que no se puede llamar desde afuera (por eso su alcance reducido).
+- En C estándar no pueden declararse funciones dentro de otras, pero en lenguajes que si, esto limita el alcance de funct2 dentro del bloque de funct1 (suponiendo que funct2 se declaró dentro de funct1), pero no limita su tiempo de vida (tomando en cuenta que sea `static`). Su tiempo de vida sigue siendo todo el programa, porque una función se comporta distinto de una variable. No significa que tenga almacenamiento automático (de hecho esto no aplica a funciones), simplemente implica que no se puede llamar desde afuera (por eso su alcance reducido). -> **Esto podría estar mal**
+- Aunque hayan dos archivos que conforman el programa, el alcance léxico de una función se limita a su propio archivo -> **Chequear esto**
 
 **Aclaración:**
 **Ident.**= Identificador
