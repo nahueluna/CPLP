@@ -3,10 +3,6 @@
 Objetivo: Conocer el manejo de identificadores en memoria y como lo definen e implementan los
 diferentes lenguajes.
 
-Siendo tiempo de vida desde que se aloca hasta que se libera y alcance desde la declaración hasta el fin del bloque, para la resolución de este trabajo se tomó la siguiente convención:
-El alcance en lenguajes como Pascal, con sección de declaración, se considera desde el Begin hasta End (declaración a fin de bloque). -> Podría estar mal, alcance desde la línea siguiente a su declaración hasta final del bloque?
-El tiempo de vida se considera desde comienzo del bloque hasta final del mismo ("línea 1").
-
 Definiciones:
 
 > Tiempo de vida
