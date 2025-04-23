@@ -51,9 +51,10 @@ Valor que apunta puntero (p^) tiene tipo de l-valor dinámico siempre.
 > Notas generales
 
 - Se indica el r-valor al momento de la alocación. Indefinido o basura indica que no se inicializa por defecto. C inicializa por defecto variables globales y estáticas. Punteros se inicializan con null (o nil).
+- El tipo de l-valor de una variable global es automático, semidinámico o dinámico según el caso, pero excepto que sea declarada con `static` en C, no es estático.
 - El tiempo de vida, alcance y tipo de l-valor de un puntero `p` se analiza igual que una variable convencional. El alcance de `p^` será igual al de `p`, pero su tiempo de vida irá desde el `new()` o asignación de algo a lo que apunta (inclusive esa línea) hasta el dispose (inclusive). Se marca de forma continua, no de a tramos según se le asigne otra cosa.
 - El alcance de una función se analiza igual que el de una variable. El tiempo de vida de la función es únicamente su bloque, cuando se ejecuta.
-- En Ada se pueden declarar arreglos con tamaño n. Si ese n no se conoce en compilación el tipo de l-valor es semidinámico. Si n es una constante, ya conocida en compilación, entonces es automático.
+- En Ada se pueden declarar arreglos con tamaño n. Si ese n no se conoce en compilación el tipo de l-valor es semidinámico. Si n es una constante numérica, ya conocida en compilación, entonces es automático.
 ___
 
 
@@ -221,7 +222,7 @@ En cuanto a su comportamiento, una variable estática conserva su valor entre la
 > Constante
 
 No tienen l-valor en el sentido tradicional. L-valor refiere a la dirección de memoria de las variables, pero las constantes no ocupan una dirección de memoria de la misma manera que las variables lo hacen.
-Una constante tiiene un valor (r-valor) que no puede cambiar durante la ejecución del programa. Una vez asignado un valor, este no podrá ser modificado posteriormente.
+Una constante tiene un valor (r-valor) que no puede cambiar durante la ejecución del programa. Una vez asignado un valor, este no podrá ser modificado posteriormente.
 
 > Variable estática vs Constante
 
@@ -527,12 +528,13 @@ Existen 3 clases de tipos: predefinidos por el lenguaje, definidos por el usuari
     <tr><td>p (línea 11)</td><td>automática</td><td>nil</td><td>12-22</td><td>7-22</td></tr>
     <tr><td>p^</td><td>dinamica</td><td>basura</td><td>12-22</td><td>15-18</td></tr>
     <tr><td>q (línea 11)</td><td>automática</td><td>nil</td><td>12-22</td><td>7-22</td></tr>
-    <tr><td>q^</td><td>dinámica</td><td>basura</td><td>12-22</td><td>16-18 (por "free p") ?</td></tr>
+    <tr><td>q^</td><td>dinámica</td><td>basura</td><td>12-22</td><td>16-20</td></tr>
   </tbody>
 </table>
 
 `nota:`
-Son 29 líneas porque se consideran las del procedimiento Uno
+- Son 29 líneas porque se consideran las del procedimiento Uno
+- Lifetime de lo que apunta un puntero es hasta la desalocación con dispose. Aplica incluso a referencias colgantes 
 
 Aclaración:
 **Ident.**= Identificador / **Tipo** es el tipo de la variable respecto del l-value
@@ -601,8 +603,8 @@ ARCHIVO2.C
     </tr>
   </thead>
   <tbody>
-    <tr><td>v1 (línea 1)</td><td>estática</td><td>0</td><td>2-4 / 9-12 / 21-23</td><td>1-28</td></tr>
-    <tr><td>a (línea 2)</td><td>estática</td><td>null</td><td>3-16</td><td>1-28</td></tr>
+    <tr><td>v1 (línea 1)</td><td>automática</td><td>0</td><td>2-4 / 9-12 / 21-23</td><td>1-28</td></tr>
+    <tr><td>a (línea 2)</td><td>automática</td><td>null</td><td>3-16</td><td>1-28</td></tr>
     <tr><td>&a</td><td>dinámica</td><td>basura</td><td>3-16</td><td>15-16</td></tr>
     <tr><td>v1 (línea 4)</td><td>automática</td><td>basura</td><td>5-8</td><td>3-8</td></tr>
     <tr><td>y (línea 4)</td><td>automática</td><td>basura</td><td>5-8</td><td>3-8</td></tr>
@@ -620,11 +622,12 @@ ARCHIVO2.C
 </table>
 
 `nota:`
-- C inicializa en 0 únicamente variables que se guardan en el segmento de datos (globales y `static`). Variables automáticas contienen basura, no son inicializadas por defecto.
+- C inicializa en 0 únicamente variables que se guardan en el segmento de datos (globales y `static`). Variables que no sean de este tipo contienen basura, no son inicializadas por defecto.
 - Prestar atención a alcance de funciones, una línea posterior a su declaración hasta que termina el bloque donde se define (el bloque en el que está, no su propia `}`).
-- `static` en funciones refiere a que limita su visibilidad, no que su tiempo de vida abarca todo el programa, como en las variables
-- En C estándar no pueden declararse funciones dentro de otras, pero en lenguajes que si, esto limita el alcance de funct2 dentro del bloque de funct1 (suponiendo que funct2 se declaró dentro de funct1), pero no limita su tiempo de vida (tomando en cuenta que sea `static`). Su tiempo de vida sigue siendo todo el programa, porque una función se comporta distinto de una variable. No significa que tenga almacenamiento automático (de hecho esto no aplica a funciones), simplemente implica que no se puede llamar desde afuera (por eso su alcance reducido). -> **Esto podría estar mal**
-- Aunque hayan dos archivos que conforman el programa, el alcance léxico de una función se limita a su propio archivo -> **Chequear esto**
+- `static` en funciones implica que podrá ser llamada en otro archivo al que fue definido. Para ello debe escribirse su firma. Esto extenderá su alcance. Caso contrario, las reglas de alcance y tiempo de vida son iguales a una función convencional.
+- Aunque hayan dos archivos que conforman el programa, el alcance léxico de una función se limita a su propio archivo, excepto por lo definido en el punto anterior.
+- En C estándar no pueden declararse funciones dentro de otras, pero en lenguajes que si, esto limita el alcance de funct2 dentro del bloque de funct1 (suponiendo que funct2 se declaró dentro de funct1).
+- En C, el valor al que apunta un puntero se aloca cuando se le asigna una dirección de memoria y se desaloca cuando termina el bloque. Es decir, su tiempo de vida comprende desde su inicialización hasta el fin del bloque.
 
 **Aclaración:**
 **Ident.**= Identificador
